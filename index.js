@@ -70,6 +70,17 @@ function addListeners() {
             const block = document.getElementById('showAndHideBlock');
             animaster().showAndHide(block, 1000);
         });
+    const worryAnimationHandler = animaster()
+        .addMove(200, {x: 80, y: 0})
+        .addMove(200, {x: 0, y: 0})
+        .addMove(200, {x: 80, y: 0})
+        .addMove(200, {x: 0, y: 0})
+        .addChangeBorder(500, '10em')
+        .buildHandler();
+    
+    document
+        .getElementById('worryAnimationBlock')
+        .addEventListener('click', worryAnimationHandler);
 }
 
 function getTransform(translation, ratio) {
@@ -138,6 +149,14 @@ function animaster() {
             });
             return this;
         },
+        addChangeBorder: function(duration, ratio) {
+            this._steps.push({
+                type: 'changeBorder',
+                duration: duration,
+                ratio: ratio
+            });
+            return this;
+        },
         play: function(element) {
             let delay = 0;
             this._steps.forEach(step => {
@@ -155,11 +174,21 @@ function animaster() {
                         case 'fadeOut':
                             this.fadeOut(element, step.duration);
                             break;
+                        case 'changeBorder':
+                            this.changeBorder(element, step.duration, step.ratio);
+                            break;
                     }
                 }, delay);
                 delay += step.duration;
             });
             return this;
+        },
+        buildHandler: function () {
+            const _this = animaster();
+            _this._steps = this._steps.slice();
+            return function (){
+                _this.play(this);
+            }
         },
         fadeIn: function (element, duration) {
             element.style.transitionDuration = `${duration}ms`;
@@ -204,5 +233,9 @@ function animaster() {
             this.fadeIn(element, duration / 3);
             setTimeout(() => {this.fadeOut(element, duration / 3);}, duration * 2 / 3);
         },
+        changeBorder: function (element, duration, ratio) {
+            element.style.animationDuration = `${duration}ms`;
+            element.style.borderRadius = ratio;        
+        }
     }
 }
