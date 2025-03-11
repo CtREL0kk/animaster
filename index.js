@@ -1,5 +1,6 @@
 addListeners();
 let stop;
+let resetMoveAndHide = {stop: function(){}};
 
 function addListeners() {
     document.getElementById('fadeInPlay')
@@ -28,7 +29,12 @@ function addListeners() {
     document.getElementById('moveAndHidePlay')
         .addEventListener('click', function () {
             const block = document.getElementById('moveAndHideBlock');
-            animaster().moveAndHide(block, 3000);
+            resetMoveAndHide = animaster().moveAndHide(block, 3000);
+        });
+    document.getElementById('moveAndHideStop')
+        .addEventListener('click', function () {
+            resetMoveAndHide.stop();
+            
         });
     document.getElementById('heartBeatPlay')
         .addEventListener('click', function () {
@@ -78,11 +84,19 @@ function animaster() {
             element.classList.add('hide');
         },
         moveAndHide: function (element, duration){
+            const _this = this;
             this.move(element, duration * .4, {x: 100, y:20});
-            this.fadeOut(element, duration * .6);
+            const id = setTimeout(() => {this.fadeOut(element, duration * .6);}, duration * .4);
+            return {
+                stop: function (){
+                    clearTimeout(id);
+                    _this.fadeIn(element, duration * .6);
+                    _this.move(element, duration * .4, {x: -0, y: -0});
+                    console.log('lalala');
+                }
+            };
         },
         heartBeat: function (element, duration){
-            clearInterval(0);
             const beat = () => {
                 this.scale(element, duration  / 2, 1.4);
                 setTimeout(() => {this.scale(element, duration  / 2, 1)}, duration / 2);
