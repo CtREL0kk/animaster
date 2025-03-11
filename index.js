@@ -70,17 +70,17 @@ function addListeners() {
             const block = document.getElementById('showAndHideBlock');
             animaster().showAndHide(block, 1000);
         });
+
     const worryAnimationHandler = animaster()
         .addMove(200, {x: 80, y: 0})
         .addMove(200, {x: 0, y: 0})
         .addMove(200, {x: 80, y: 0})
         .addMove(200, {x: 0, y: 0})
         .addChangeBorder(500, '10em')
-        .buildHandler();
 
     document
         .getElementById('worryAnimationBlock')
-        .addEventListener('click', worryAnimationHandler);
+        .addEventListener('click', worryAnimationHandler.buildHandler());
 }
 
 function getTransform(translation, ratio) {
@@ -99,6 +99,12 @@ function animaster() {
         _steps: [],
         _element: null,
         _initialState: null,
+
+        _clone: function () {
+            const clone = animaster();
+            clone._steps = this._steps.slice();
+            return clone;
+        },
 
         resetFadeIn: function (element) {
             element.style.transitionDuration = null;
@@ -123,53 +129,60 @@ function animaster() {
         },
 
         addMove: function(duration, translation) {
-            this._steps.push({
+            const clone = this._clone();
+            clone._steps.push({
                 type: 'move',
                 duration: duration,
                 translation: translation
             });
-            return this;
+            return clone;
         },
 
         addFadeIn: function(duration) {
-            this._steps.push({
+            const clone = this._clone();
+            clone._steps.push({
                 type: 'fadeIn',
                 duration: duration,
             });
-            return this;
+            return clone;
         },
 
         addFadeOut: function(duration) {
-            this._steps.push({
+            const clone = this._clone();
+            clone._steps.push({
                 type: 'fadeOut',
                 duration: duration,
             });
-            return this;
+            return clone;
         },
 
         addScale: function(duration, ratio) {
-            this._steps.push({
+            const clone = this._clone();
+            clone._steps.push({
                 type: 'scale',
                 duration: duration,
                 ratio: ratio
             });
-            return this;
+            return clone;
         },
+
         addChangeBorder: function(duration, ratio) {
-            this._steps.push({
+            const clone = this._clone();
+            clone._steps.push({
                 type: 'changeBorder',
                 duration: duration,
                 ratio: ratio
             });
-            return this;
+            return clone;
         },
 
         addDelay: function(duration) {
-            this._steps.push({
+            const clone = this._clone();
+            clone._steps.push({
                 type: 'delay',
                 duration: duration,
             });
-            return this;
+            return clone;
         },
 
         play: function(element, cycled = false) {
@@ -223,20 +236,21 @@ function animaster() {
                     this._steps = [];
                 },
                 reset: () => {
-                    this._steps = [];
+                    this._clone()._steps = [];
                     element.style.transform = this._initialState.transform;
                     element.style.opacity = this._initialState.opacity;
                     element.classList = this._initialState.classList;
                 }
             };
         },
+
         buildHandler: function () {
-            const _this = animaster();
-            _this._steps = this._steps.slice();
-            return function (){
+            const _this = this._clone();
+            return function () {
                 _this.play(this);
-            }
+            };
         },
+
         fadeIn: function (element, duration) {
             element.style.transitionDuration = `${duration}ms`;
             element.classList.remove('hide');
@@ -275,9 +289,10 @@ function animaster() {
                 .addFadeOut(duration / 3)
                 .play(element);
         },
+
         changeBorder: function (element, duration, ratio) {
             element.style.animationDuration = `${duration}ms`;
             element.style.borderRadius = ratio;
         }
-    }
+    };
 }
