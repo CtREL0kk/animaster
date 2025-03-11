@@ -49,7 +49,7 @@ function addListeners() {
     document.getElementById('moveAndHidePlay')
         .addEventListener('click', function () {
             const block = document.getElementById('moveAndHideBlock');
-            resetMoveAndHide = animaster().moveAndHide(block, 3000)
+            resetMoveAndHide = animaster().moveAndHide(block, 3000);
         });
     document.getElementById('moveAndHideStop')
         .addEventListener('click', function () {
@@ -70,6 +70,17 @@ function addListeners() {
             const block = document.getElementById('showAndHideBlock');
             animaster().showAndHide(block, 1000);
         });
+    const worryAnimationHandler = animaster()
+        .addMove(200, {x: 80, y: 0})
+        .addMove(200, {x: 0, y: 0})
+        .addMove(200, {x: 80, y: 0})
+        .addMove(200, {x: 0, y: 0})
+        .addChangeBorder(500, '10em')
+        .buildHandler();
+
+    document
+        .getElementById('worryAnimationBlock')
+        .addEventListener('click', worryAnimationHandler);
 }
 
 function getTransform(translation, ratio) {
@@ -144,6 +155,14 @@ function animaster() {
             });
             return this;
         },
+        addChangeBorder: function(duration, ratio) {
+            this._steps.push({
+                type: 'changeBorder',
+                duration: duration,
+                ratio: ratio
+            });
+            return this;
+        },
 
         addDelay: function(duration) {
             this._steps.push({
@@ -175,6 +194,9 @@ function animaster() {
                             break;
                         case 'fadeOut':
                             this.fadeOut(element, step.duration);
+                            break;
+                        case 'changeBorder':
+                            this.changeBorder(element, step.duration, step.ratio);
                             break;
                         case 'delay':
                             break;
@@ -208,7 +230,13 @@ function animaster() {
                 }
             };
         },
-
+        buildHandler: function () {
+            const _this = animaster();
+            _this._steps = this._steps.slice();
+            return function (){
+                _this.play(this);
+            }
+        },
         fadeIn: function (element, duration) {
             element.style.transitionDuration = `${duration}ms`;
             element.classList.remove('hide');
@@ -247,5 +275,9 @@ function animaster() {
                 .addFadeOut(duration / 3)
                 .play(element);
         },
+        changeBorder: function (element, duration, ratio) {
+            element.style.animationDuration = `${duration}ms`;
+            element.style.borderRadius = ratio;
+        }
     }
 }
