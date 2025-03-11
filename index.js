@@ -29,6 +29,11 @@ function addListeners() {
             const block = document.getElementById('moveAndHideBlock');
             animaster().moveAndHide(block, 3000);
         });
+    document.getElementById('heartBeatPlay')
+        .addEventListener('click', function () {
+            const block = document.getElementById('heartBeatBlock');
+            animaster().heartBeat(block, 1000);
+        });
 }
 
 function getTransform(translation, ratio) {
@@ -65,6 +70,14 @@ function animaster() {
         moveAndHide: function (element, duration){
             this.move(element, duration * .4, {x: 100, y:20});
             this.fadeOut(element, duration * .6);
+        },
+        heartBeat: function (element, duration){
+            clearInterval(0);
+            const beat = () => {
+                this.scale(element, duration  / 2, 1.4);
+                setTimeout(() => {this.scale(element, duration  / 2, 1)}, duration / 2);
+            }
+            setInterval(beat, duration);
         }
     }
 }
